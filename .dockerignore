@@ -1,0 +1,29 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+
+# Environment
+.env
+
+# VS Code
+.vscode/
+
+# Git
+.git
+.gitignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.yaml
+
+# OneDrive sync files
+~$*
+
+# Logs
+*.log
+
+# Others
+node_modules/
