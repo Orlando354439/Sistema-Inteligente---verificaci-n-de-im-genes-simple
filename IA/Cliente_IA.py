@@ -8,16 +8,16 @@ load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY", "")
 client = genai.Client(api_key=API_KEY)
 
-def Obtain_response(prompt:str) -> str:
+def Obtain_response(img, prompt:str):
     # Aquí se procesaría la imagen y se cargaría al modelo
 
     #Primero procesar texto para pruebas
     response = client.models.generate_content(
         model="gemini-2.5-flash",
 
-        contents = prompt
+        contents = [img, prompt]
     )
-    return response.text
+    return response
 
 if __name__ == "__main__":
     prompt = "¿Cómo estás?"
