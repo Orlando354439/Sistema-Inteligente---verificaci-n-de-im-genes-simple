@@ -26,7 +26,7 @@ app = FastAPI(title="Sistema Inteligente de Respuestas a Imágenes", description
 @app.post("/upload_image/")
 async def upload_image(
     img: UploadFile = File(..., description="Imagen en formato de bytes"),
-    prompt: str = Form(..., description="Pregunta del usuario relacionada con la imagen"),
+    prompt: str | None = Form(None, description="Pregunta del usuario relacionada con la imagen"),
     DigitalNotes: Optional[bool] = Form(False, description="Indica si se desea obtener notas digitales de la imagen"),
     ClasificationDocuments: Optional[bool] = Form(False, description="Indica si se desea clasificar documentos relacionados con la imagen"),
     RelevantInfo: Optional[bool] = Form(False, description="Indica si se desea obtener información relevante de la imagen")
@@ -58,7 +58,7 @@ async def upload_image(
 
     logger.info("Image processed successfully, sending to AI model for response generation.")
 
-    full_prompt = prompt
+    full_prompt = ""
 
     if DigitalNotes:
         full_prompt += "Obtener notas digitales de la imagen"
@@ -72,13 +72,7 @@ async def upload_image(
         full_prompt += "Obtener información relevante de la imagen"
         logger.info("Relevant Information option selected.")
 
-    else:
-        full_prompt = prompt
-        logger.info("No specific option selected, using default prompt.")
-
-    
-
-    AiResponse = response(image_part, full_prompt)
+    AiResponse = response(image_part, prompt if not full_prompt else full_prompt)
 
     return JSONResponse(content={
         "filename": img.filename,
