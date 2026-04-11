@@ -1,11 +1,13 @@
 #Archivo de configuración principal del sistema inteligente
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException, File, UploadFile, Form
 from fastapi.responses import JSONResponse
-from typing import List, Optional
-#from model import Image 
+from fastapi.staticfiles import StaticFiles
+from typing import Optional
+#from model import Image
 from IA.Cliente_IA import Obtain_response as response
 from dotenv import load_dotenv
-import os
 import logging
 import base64
 
@@ -20,10 +22,21 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Sistema Inteligente de Respuestas a Imágenes", description="Un sistema que procesa imágenes y responde a preguntas relacionadas con ellas utilizando IA.")
+BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_DIST = BASE_DIR / "frontend" / "dist"
 
-#Endpoint para almacenar imagen (de manera individual) y cargar al modelo - gemini parece ser es el unico de agrapa
+app = FastAPI(
+    title="Sistema Inteligente de Respuestas a Imágenes",
+    description="Un sistema que procesa imágenes y responde a preguntas relacionadas con ellas utilizando IA.",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
+)
+
+# Endpoint para almacenar imagen (de manera individual) y cargar al modelo - gemini parece ser es el unico de agrapa
+# /api/upload_image/ es el que usa el frontend en producción (mismo origen); /upload_image/ mantiene compatibilidad.
 @app.post("/upload_image/")
+@app.post("/api/upload_image/")
 async def upload_image(
     img: UploadFile = File(..., description="Imagen en formato de bytes"),
     prompt: str | None = Form(None, description="Pregunta del usuario relacionada con la imagen"),
@@ -79,6 +92,20 @@ async def upload_image(
         "prompt": full_prompt,
         "ai_response": AiResponse.text
     })
+
+
+if FRONTEND_DIST.is_dir():
+    app.mount(
+        "/",
+        StaticFiles(directory=str(FRONTEND_DIST), html=True),
+        name="frontend",
+    )
+    logger.info("Sirviendo frontend estático desde %s", FRONTEND_DIST)
+else:
+    logger.warning(
+        "No se encontró el build del frontend en %s. Ejecuta `npm run build` en frontend/ o usa la imagen Docker.",
+        FRONTEND_DIST,
+    )
 
 
 if __name__ == "__main__":
