@@ -120,6 +120,7 @@ export default function ImageAnalyzer() {
       formData.append('ClasificationDocuments', mode === 'classifyDocs' ? 'true' : 'false')
       formData.append('RelevantInfo', mode === 'relevantInfo' ? 'true' : 'false')
     }
+    
 
     try {
       const res = await fetch('/api/upload_image/', { method: 'POST', body: formData })
